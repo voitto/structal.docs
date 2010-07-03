@@ -131,9 +131,14 @@ class View {
     $api_method = $action;
     
     if (array_key_exists($action,$api_methods)){
-      trigger_before( $api_method, $request, $db );
-      $action = @create_function( '&$vars', $api_methods[$action] );
-      $this->named_vars['resource'] =& $db->get_table($api_method_perms[$api_method]['table']);
+	    if (isset($db)) {
+	      trigger_before( $api_method, $request, $db );
+	      $action = @create_function( '&$vars', $api_methods[$action] );
+	      $this->named_vars['resource'] =& $db->get_table($api_method_perms[$api_method]['table']);
+			} else {
+	      trigger_before( $api_method, $request, $request );
+	      $action = @create_function( '&$vars', $api_methods[$action] );
+			}
       if (!($this->named_vars['resource']->can($api_method_perms[$api_method]['perm'])))
         trigger_error('not allowed sorry',E_USER_ERROR);
     }
@@ -142,9 +147,15 @@ class View {
       $action = 'index';
     
     if (function_exists( $action )) {
-      trigger_before( $request->action, $request, $db );
-      $result = $action( array_merge( $this->named_vars, $db->get_resource() ));
-      trigger_after( $request->action, $request, $db );
+	    if (isset($db)) {
+	      trigger_before( $request->action, $request, $db );
+	      $result = $action( array_merge( $this->named_vars, $db->get_resource() ));
+	      trigger_after( $request->action, $request, $db );
+	    } else {
+	      trigger_before( $request->action, $request, $request );
+	      $result = $action( array_merge( $this->named_vars ));
+	      trigger_after( $request->action, $request, $request );
+	    }
       if ( is_array( $result ))
         extract( $result );
     }
