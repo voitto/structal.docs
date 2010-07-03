@@ -117,7 +117,12 @@ class View {
   function render( &$request ) {
     trigger_before('render',$this,$this);
     // boot.php calls $response->render()
-    
+
+    if (!isset($request->activeroute)) {
+	    $request->connect('');
+	    $request->routematch();
+    }
+
     global $db;
     
     $ext = $this->pick_template_extension( $request );
