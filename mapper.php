@@ -736,6 +736,10 @@ class Mapper {
       $_SERVER['FULL_URL'] .= $_SERVER['SERVER_NAME'] . $port . $script;
     }
     global $pretty_url_base;
+    if (file_exists('.htaccess') && !isset($pretty_url_base)) {
+			list($subdomain, $rest) = explode('.', $_SERVER['SERVER_NAME'], 2);
+      $pretty_url_base = 'http://'.$subdomain.'.'.$rest;
+    }
     if (isset($pretty_url_base) && !empty($pretty_url_base)) {
       if (!empty($_SERVER['QUERY_STRING']))
         return $pretty_url_base.'/?'.$_SERVER['QUERY_STRING'];

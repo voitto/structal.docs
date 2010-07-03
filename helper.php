@@ -470,6 +470,8 @@ if (!isset($skip_globals)){
 	global $api_methods;
 	global $pretty_url_base;
 	global $request;
+	global $db;
+	global $response;
 	$api_methods = array();
 }
 
