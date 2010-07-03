@@ -262,13 +262,6 @@ function environment() {
    */
 
 function trigger_before( $func, &$obj_a, &$obj_b ) {
-  if (environment('show_timer')) {
-    global $exec_time;
-    $time_end = microtime_float();
-    $time = $time_end - $exec_time;
-    $diff = substr($time,1,5);
-    echo "$diff seconds <br />$func ";
-  }
   if ( isset( $GLOBALS['ASPECTS']['before'][$func] ) ) {
     foreach( $GLOBALS['ASPECTS']['before'][$func] as $callback ) {
       call_user_func_array( $callback, array( $obj_a, $obj_b ) );
