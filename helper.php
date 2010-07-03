@@ -380,9 +380,15 @@ function always() {
   return true;
 }
 
+if (!isset($skip_globals)){
+	global $api_methods;
+	global $pretty_url_base;
+	global $request;
+	$api_methods = array();
+}
 
-global $api_methods;
-global $pretty_url_base;
-global $request;
-$api_methods = array();
-
+if (!isset($hide_debug)){
+	ini_set('display_errors','1');
+	ini_set('display_startup_errors','1');
+	error_reporting (E_ALL & ~E_NOTICE );
+}
