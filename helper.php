@@ -109,10 +109,14 @@ class AuthToken  {
 
 }
 
-global $api_methods;
-global $pretty_url_base;
-global $request;
-$api_methods = array();
+/**
+ * plugin
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/plugin
+ */
 
 function plugin( $plugin, $plugpath='' ) {
   if ( file_exists( $plugpath . $plugin . '.php' ) ) {
@@ -124,9 +128,28 @@ function plugin( $plugin, $plugpath='' ) {
   }
 }
 
+/**
+ * template_exists
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/template_exists
+ */
+
 function template_exists() {
  return 0;
 }
+
+/**
+ * controller_path
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/controller_path
+ */
+
 function controller_path() {
  global $request;
  if (empty($request->controller))
@@ -134,21 +157,81 @@ function controller_path() {
  else
  return '';
 }
+
+/**
+ * type_of
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/type_of
+ */
+
 function type_of() {
  return 0;
 }
+
+/**
+ * admin_alert
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/admin_alert
+ */
+
 function admin_alert() {
  return 0;
 }
+
+/**
+ * mime_types
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/mime_types
+ */
+
 function mime_types() {
  return array();
 }
+
+/**
+ * load_apps
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/load_apps
+ */
+
 function load_apps() {
  return 0;
 }
+
+/**
+ * get_profile_id
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/get_profile_id
+ */
+
 function get_profile_id() {
  return 0;
 }
+
+/**
+ * environment
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/environment
+ */
+
 function environment() {
 	$variants = array(
 	  array(
@@ -163,9 +246,150 @@ function environment() {
 	);
  return array('content_types'=>$variants);
 }
-function trigger_before() {
- return 0;
+
+  /**
+   * Trigger Before
+   * 
+   * trip before filters for a function
+   * 
+	 * @package   Structal
+	 * @author    Brian Hendrickson <brian@megapump.com>
+	 * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+	 * @link      http://structal.org/trigger_before
+   * @param string $func
+   * @param object $obj_a
+   * @param object $obj_b
+   */
+
+function trigger_before( $func, &$obj_a, &$obj_b ) {
+  if (environment('show_timer')) {
+    global $exec_time;
+    $time_end = microtime_float();
+    $time = $time_end - $exec_time;
+    $diff = substr($time,1,5);
+    echo "$diff seconds <br />$func ";
+  }
+  if ( isset( $GLOBALS['ASPECTS']['before'][$func] ) ) {
+    foreach( $GLOBALS['ASPECTS']['before'][$func] as $callback ) {
+      call_user_func_array( $callback, array( $obj_a, $obj_b ) );
+    }
+  }
 }
-function trigger_after() {
- return 0;
+
+  /**
+   * Trigger After
+   * 
+   * trip after filters for a function
+   * 
+	 * @package   Structal
+	 * @author    Brian Hendrickson <brian@megapump.com>
+	 * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+	 * @link      http://structal.org/trigger_after
+   * @param string $func
+   * @param object $obj_a
+   * @param object $obj_b
+   */
+
+function trigger_after( $func, &$obj_a, &$obj_b ) {
+  if ( isset( $GLOBALS['ASPECTS']['after'][$func] ) ) {
+    foreach( $GLOBALS['ASPECTS']['after'][$func] as $callback ) {
+      call_user_func_array( $callback, array( $obj_a, $obj_b ) );
+    }
+  }
 }
+
+
+  /**
+   * aspect_join_functions
+   * 
+   * add trigger function name pairs to GLOBALS
+   * 
+	 * @package   Structal
+	 * @author    Brian Hendrickson <brian@megapump.com>
+	 * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+	 * @link      http://structal.org/aspect_join_functions
+   * @param string $func
+   * @param string $callback
+   * @param string $type
+   */
+   
+function aspect_join_functions( $func, $callback, $type = 'after' ) {
+  $GLOBALS['ASPECTS'][$type][$func][] = $callback;
+}
+
+
+  /**
+   * Before Filter
+   * 
+   * set an aspect function to trigger before another function
+   * 
+	 * @package   Structal
+	 * @author    Brian Hendrickson <brian@megapump.com>
+	 * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+	 * @link      http://structal.org/before_filter
+   * @param string $name
+   * @param string $func
+   * @param string $when
+   */
+
+function before_filter( $name, $func, $when = 'before' ) {
+  aspect_join_functions( $func, $name, $when );
+}
+
+
+  /**
+   * After Filter
+   * 
+   * set an aspect function to trigger after another function
+   * 
+	 * @package   Structal
+	 * @author    Brian Hendrickson <brian@megapump.com>
+	 * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+	 * @link      http://structal.org/after_filter
+   * @param string $name
+   * @param string $func
+   * @param string $when
+   */
+
+function after_filter( $name, $func, $when = 'after' ) {
+  aspect_join_functions( $func, $name, $when );
+}
+
+/**
+ * Never
+ * 
+ * returns false
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/never
+ * @return boolean false
+ */
+
+function never() {
+  return false;
+}
+
+/**
+ * Always
+ * 
+ * returns true
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/always
+ * @return boolean true
+ */
+
+function always() {
+  return true;
+}
+
+
+global $api_methods;
+global $pretty_url_base;
+global $request;
+$api_methods = array();
+
