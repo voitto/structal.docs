@@ -242,9 +242,15 @@ class View {
     
     if ( file_exists( $view ) && function_exists( $action ) ) {
       
-      trigger_before( $request->action, $request, $db );
-      $result = $action( array_merge( $this->named_vars, $db->get_resource() ));
-      trigger_after( $request->action, $request, $db );
+	    if (isset($db)) {
+	      trigger_before( $request->action, $request, $db );
+	      $result = $action( array_merge( $this->named_vars, $db->get_resource() ));
+	      trigger_after( $request->action, $request, $db );
+			} else {
+	      trigger_before( $request->action, $request, $request );
+	      $result = $action( array_merge( $this->named_vars ));
+	      trigger_after( $request->action, $request, $request );
+			}
       
       if ( is_array( $result ))
         extract( $result );
