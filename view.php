@@ -60,14 +60,16 @@ class View {
     global $request;
     $env =& environment();
     
-    if ( isset( $request->resource ))
-      $this->collection = new Collection( $request->resource );
-    else
-      $this->collection = new Collection( null );
+    if (class_exists('Collection')){
+	    if ( isset( $request->resource ))
+	      $this->collection = new Collection( $request->resource );
+	    else
+	      $this->collection = new Collection( null );
+	    $this->named_vars['collection'] =& $this->collection;
+    }
     
     $this->named_vars['db'] =& $db;
     $this->named_vars['request'] =& $request;
-    $this->named_vars['collection'] =& $this->collection;
     $this->named_vars['response'] =& $this;
     if (get_profile_id())
       $this->named_vars['profile'] =& get_profile();
@@ -266,7 +268,8 @@ class View {
         if (isset($model->blob))
           $template = $model->blob;
         trigger_before( $request->action, $request, $db );
-        $Member = $this->collection->MoveFirst();
+		    if (class_exists('Collection'))
+          $Member = $this->collection->MoveFirst();
         render_blob( $Member->$template, $ext );
       } else {
         
