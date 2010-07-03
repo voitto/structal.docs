@@ -92,3 +92,69 @@ class Helper {
 	}
 	
 }
+
+/**
+ * AuthToken
+ *
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/authtoken
+ */
+
+class AuthToken  {
+ 
+  var $token;
+  var $secret;
+
+}
+
+global $api_methods;
+global $pretty_url_base;
+global $request;
+$api_methods = array();
+
+function plugin( $plugin, $plugpath='' ) {
+  if ( file_exists( $plugpath . $plugin . '.php' ) ) {
+    include $plugpath . $plugin . '.php';
+    $init = $plugin . "_init";
+    if ( function_exists( $init ) )
+      $init();
+    return;
+  }
+}
+
+function template_exists() {
+ return 0;
+}
+function controller_path() {
+ global $request;
+ if (empty($request->controller))
+ return 'index.php';
+ else
+ return '';
+}
+function type_of() {
+ return 0;
+}
+function admin_alert() {
+ return 0;
+}
+function mime_types() {
+ return array();
+}
+function load_apps() {
+ return 0;
+}
+function get_profile_id() {
+ return 0;
+}
+function environment() {
+ return array('content_types'=>1);
+}
+function trigger_before() {
+ return 0;
+}
+function trigger_after() {
+ return 0;
+}
