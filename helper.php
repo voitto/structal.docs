@@ -380,6 +380,92 @@ function always() {
   return true;
 }
 
+/**
+ * content_types
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/content_types
+ */
+
+function content_types(){
+	$env = environment();
+	return $env['content_types'];
+}
+
+/**
+ * render
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/render
+ */
+
+function render($varios, $scope=false, $prefix='unique', $suffix='value') {
+  if ( $scope )
+    $vals = $scope;
+  else
+    $vals = $GLOBALS;
+  $i = 0;
+  foreach ($varios as $orig) {
+    $var =& $varios[$i];
+    $old = $var;
+    $var = $new = $prefix . rand() . $suffix;
+    $vname = FALSE;
+    foreach( $vals as $key => $val ) {
+      if ( $val === $new ) $vname = $key;
+    }
+    $var = $old;
+    if ($vname) {
+      $varios[$vname] = $var;
+    }
+    $i++;
+  }
+  return $varios;
+}
+
+/**
+ * render_partial
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/render_partial
+ */
+
+function render_partial( $template ) {
+  
+  global $request,$response;
+  
+  if (!(strpos($template,".") === false)) {
+    $spleet = split("\.",$template);
+    $template = $spleet[0];
+    $request->set( 'client_wants', $spleet[1] );
+  }
+  
+  $response->render_partial( $request, $template );
+  
+}
+
+/**
+ * content_for_layout
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/content_for_layout
+ */
+
+function content_for_layout() {
+  
+  global $request;
+  
+  render_partial( $request->action );
+  
+}
+
 if (!isset($skip_globals)){
 	global $api_methods;
 	global $pretty_url_base;
