@@ -150,7 +150,18 @@ function get_profile_id() {
  return 0;
 }
 function environment() {
- return array('content_types'=>1);
+	$variants = array(
+	  array(
+	    'id' => 'html',
+	    'qs' => 1.000,
+	    'type' => 'text/html',
+	    'encoding' => null,
+	    'charset' => 'utf-8',
+	    'language' => 'en',
+	    'size' => 3000
+	  )
+	);
+ return array('content_types'=>$variants);
 }
 function trigger_before() {
  return 0;
