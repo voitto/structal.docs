@@ -466,6 +466,100 @@ function content_for_layout() {
   
 }
 
+/**
+ * redirect_to
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/redirect_to
+ */
+
+function redirect_to( $param, $altparam = NULL ) {
+  
+  global $request,$db;
+  
+  trigger_before( 'redirect_to', $request, $db );
+  
+  if (is_ajax()){
+    echo "OK";
+    exit;
+  }else{
+    $request->redirect_to( $param, $altparam );
+  }
+  
+}
+
+/**
+ * url_for
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/url_for
+ */
+
+function url_for( $params, $altparams = NULL ) {
+
+  global $request;
+  
+  print $request->url_for( $params, $altparams );
+  
+}
+
+/**
+ * is_ajax
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/is_ajax
+ */
+
+function is_ajax() {
+  return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']=="XMLHttpRequest");
+}
+
+/**
+ * url
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/url
+ */
+
+function url($data){
+	global $request;
+	return $request->url_for($data);
+}
+
+/**
+ * add_include_path
+ * 
+ * @package   Structal
+ * @author    Brian Hendrickson <brian@megapump.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link      http://structal.org/add_include_path
+ */
+
+function add_include_path($path,$prepend = false) {
+  if (!file_exists($path) OR (file_exists($path) && filetype($path) !== 'dir'))
+  {
+      trigger_error("Include path '{$path}' not exists", E_USER_WARNING);
+      continue;
+  }
+  
+  $paths = explode(PATH_SEPARATOR, get_include_path());
+  
+  if (array_search($path, $paths) === false && $prepend)
+      array_unshift($paths, $path);
+  if (array_search($path, $paths) === false)
+      array_push($paths, $path);
+  
+  set_include_path(implode(PATH_SEPARATOR, $paths));
+}
+
 if (!isset($skip_globals)){
 	global $api_methods;
 	global $pretty_url_base;
