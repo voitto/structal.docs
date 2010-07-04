@@ -12,11 +12,11 @@ require 'structal/config.php';
 // make a "request object" to map URLs
 $request = new Mapper();
 
-// make a route to the oauth_login action
-$request->connect('oauth_login');
+// make a route to the twitter_login action
+$request->connect('twitter_login');
 
-// oauth_login (Twitter) action
-function oauth_login( &$vars ){
+// Twitter Login
+function twitter_login( &$vars ){
 	require 'structal/twitter.php';
 	require 'structal/OAuth.php';
 	extract($vars);
@@ -37,7 +37,7 @@ function oauth_login( &$vars ){
 // make a route to the facebook_login action
 $request->connect('facebook_login');
 
-// facebook_login (Facebook) action
+// Facebook Login
 function facebook_login( &$vars ){
 	require 'structal/facebook.php';
 	add_include_path('structal');
@@ -56,15 +56,15 @@ function facebook_login( &$vars ){
   redirect_to($request->base);
 }
 
-// make a route to the authsub action
-$request->connect('authsub');
+// make a route to the buzz_login action
+$request->connect('buzz_login');
 
-// authsub (Google) action
-function authsub( &$vars ){
+// Buzz Login
+function buzz_login( &$vars ){
 	require 'structal/buzz.php';
 	require 'structal/OAuth.php';
 	extract($vars);
-	$b = new Buzz( GG_KEY, GG_SEC, url('authsub') );
+	$b = new Buzz( GG_KEY, GG_SEC, url('buzz_login') );
 	if (!isset($request->oauth_token)) {
 		$token = $b->request_token();
 		$_SESSION['token_secret'] = $token->secret;
