@@ -1,0 +1,17 @@
+
+<h1><?php echo $msg; ?></h1>
+
+<ul>
+
+	<li>Google Buzz: 
+    <?php echo $request->link_to('authsub'); ?>
+  </li>
+	<li>Twitter: 
+    <?php echo $request->link_to('oauth_login'); ?>
+  </li>
+	<li>Facebook: 
+    <?php echo $request->link_to('facebook_login'); ?>
+  </li>
+
+</ul>
+
