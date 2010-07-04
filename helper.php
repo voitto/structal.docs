@@ -544,19 +544,15 @@ function url($data){
  */
 
 function add_include_path($path,$prepend = false) {
-  if (!file_exists($path) OR (file_exists($path) && filetype($path) !== 'dir'))
-  {
-      trigger_error("Include path '{$path}' not exists", E_USER_WARNING);
-      continue;
+  if (!file_exists($path) OR (file_exists($path) && filetype($path) !== 'dir')) {
+    trigger_error("Include path '{$path}' not exists", E_USER_WARNING);
+    continue;
   }
-  
   $paths = explode(PATH_SEPARATOR, get_include_path());
-  
   if (array_search($path, $paths) === false && $prepend)
       array_unshift($paths, $path);
   if (array_search($path, $paths) === false)
       array_push($paths, $path);
-  
   set_include_path(implode(PATH_SEPARATOR, $paths));
 }
 
@@ -567,6 +563,7 @@ if (!isset($skip_globals)){
 	global $db;
 	global $response;
 	$api_methods = array();
+	session_start();
 }
 
 if (!isset($hide_debug)){

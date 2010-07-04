@@ -179,7 +179,10 @@ class Facebook {
   }
 
 	function authorize_from_access() {
-	  $this->userid = $this->api->users->getLoggedInUser();
+		global $request;
+		$sess_data = (array) $this->api->auth->callMethod('auth.getSession',array('auth_token'=>$request->auth_token));
+	  $this->userid = $sess_data['uid'];
+	  return array($sess_data['uid'],$sess_data['session_key']);
 	}
 	
 	function permission_to( $perm, $uid=false, $force=false, $return=false ) {
