@@ -31,7 +31,7 @@ function twitter_login( &$vars ){
 		trigger_error('error: could not get token or secret from Twitter',E_USER_ERROR);
 	$_SESSION['twit_token'] = $atoken;
 	$_SESSION['twit_secret'] = $asecret;
-	redirect_to($request->base);
+	redirect_to(url(''));
 }
 
 // make a route to the facebook_login action
@@ -53,7 +53,7 @@ function facebook_login( &$vars ){
 		trigger_error('error: could not get session or userid from Facebook',E_USER_ERROR);
 	$_SESSION['face_userid'] = $userid;
 	$_SESSION['face_session'] = $sesskey;
-	redirect_to($request->base);
+	redirect_to(url(''));
 }
 
 // make a route to the buzz_login action
@@ -75,7 +75,7 @@ function buzz_login( &$vars ){
 		trigger_error('error: could not get token or secret from Google Buzz',E_USER_ERROR);
 	$_SESSION['goog_token'] = $atoken;
 	$_SESSION['goog_secret'] = $asecret;
-	redirect_to($request->base);
+	redirect_to(url(''));
 }
 
 // make a route to the index action
