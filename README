@@ -1,6 +1,6 @@
 Structal
 
-Why is Structal like Ruby? While it has a full restful, resource-oriented mvc mode that mimics [Rails], the more interesting part of Structal are the simple objects that act like Ruby objects. For instance, Structal includes classes for Google Buzz, Twitter and Facebook, all of which act like John Nunemaker's Ruby Twitter gem. (which is not a part of Rails, but is [Ruby]).
+Why is Structal like Ruby? While it has a full restful, resource-oriented mvc mode that mimics [Rails], the more interesting parts of Structal are the simple objects that act like Ruby objects. For instance, Structal includes classes for Google Buzz, Twitter and Facebook, all of which act like John Nunemaker's Ruby Twitter gem. (which is not a part of Rails, but is [Ruby]).
 
 Here's an example, using the Structal Facebook class to connect to Facebook:
 
@@ -24,3 +24,6 @@ list( $userid, $sesskey ) = $f->authorize_from_access();
 See the full example here:
 
 http://github.com/voitto/structal/blob/master/example1/index.php
+
+
+Structal doesn't really have a home page yet, but it will be at http://structal.org -- you can follow the blog at http://structal.org/blog/ or the Twitter account at http://twitter.com/structal_lang - thanks!
