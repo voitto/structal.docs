@@ -17,6 +17,7 @@ $f = new Facebook( FB_KEY, FB_SEC, FB_AID, FB_NAM, false, url('facebook_login') 
 if (!isset( $request->auth_token )) {
 
 	$token = $f->request_token();
+	
 	redirect_to( $token->authorize_url() );
 
 }
@@ -77,4 +78,4 @@ See the full example here:
 http://github.com/voitto/structal/blob/master/example1/index.php
 
 
-Structal doesn't really have a home page yet, but it will be at http://structal.org -- you can follow the blog at http://structal.org/blog/ or the Twitter account at http://twitter.com/structal_lang - thanks!
+Structal doesn't really have a home page yet, but it will be at http://structal.org -- you can follow the blog at http://structal.org/blog/ or my Twitter at http://twitter.com/brianjesse - thanks!
