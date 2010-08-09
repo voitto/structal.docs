@@ -268,39 +268,6 @@ class Buzz {
   function search( $string ) {
   }
 
-  function friends_timeline() {
-	  $tk = new BuzzToken();
-	  $apiroot = $tk->api_root;
-	  $url = $apiroot . '/@me/@consumption';
-		$params = array(
-		  'oauth_consumer_key' => $this->consumer->key,
-		  'oauth_timestamp' => time(),
-		  'oauth_version' => OAuthRequest::$version,
-		  'oauth_nonce' => md5(microtime().mt_rand()),
-		  'oauth_token'=>$this->token->key
-		);
-    $oauthRequest = OAuthRequest::from_request(
-	    'GET',
-	    $url,
-	    $params
-	  );
-    $oauthRequest->sign_request(
-	    $this->method,
-	    $this->consumer,
-	    $this->token
-	  );
-    $url = $oauthRequest->to_url();
-		$headers = array();
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-    curl_setopt($ch, CURLOPT_FAILONERROR, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    return @curl_exec($ch);
-  }
-
 	function http( $url, $post_data = null, $headers = null ){
 		$ch = curl_init();
     if (defined("CURL_CA_BUNDLE_PATH"))

@@ -222,25 +222,6 @@ class Facebook {
     }
   }
 
-  function friends_timeline( $uid ) {
-
-		$hash = md5("app_id=".$this->appid."session_key=".$this->api->sessionKey."source_id=".$uid.Services_Facebook::$secret);
-
-		$url = 'http://www.facebook.com/activitystreams/feed.php';
-		$url .= '?source_id=';
-		$url .= $uid;
-		$url .= '&app_id=';
-		$url .= $this->appid;
-		$url .= '&session_key=';
-		$url .= $this->api->sessionKey;
-		$url .= '&sig=';
-		$url .= $hash;
-		$url .= '&v=0.7&read';
-
-    return $this->http($url);
-
-  }
-
   function like( $id, $uid=false ) {
 	  //$this->permission_to( 'publish_stream', $uid );
 	  $params = array(
@@ -332,30 +313,5 @@ class Facebook {
 	    return false;
 		return true;
   }
-
-  function http($url, $post_data = null) {/*{{{*/
-    $ch = curl_init();
-    if (defined("CURL_CA_BUNDLE_PATH")) curl_setopt($ch, CURLOPT_CAINFO, CURL_CA_BUNDLE_PATH);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
-		curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    //////////////////////////////////////////////////
-    ///// Set to 1 to verify SSL Cert //////
-    //////////////////////////////////////////////////
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    if (isset($post_data)) {
-      curl_setopt($ch, CURLOPT_POST, 1);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-    }
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Structal');
-    $response = curl_exec($ch);
-    $this->http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $this->last_api_call = $url;
-    curl_close ($ch);
-    return $response;
-  }
-
 }
 
