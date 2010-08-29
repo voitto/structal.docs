@@ -64,13 +64,26 @@ class Helper {
 		$tag_options = '';
 		if ($options)
 		  $tag_options = $this->tag_options( $options, $escape );
+		if (!isset($options['no-end']))
+		  $content = "<$name$tag_options>$content</$name>";
+		else
+		  $content = "<$name$tag_options>$content";
 		if (!isset($options['return']))
-  		echo "<$name$tag_options>$content</$name>";
+  		echo $content;
     else
-      return "<$name$tag_options>$content</$name>";
+      return $content;
     return "";
 	}
-
+	
+	function end_content_tag( $name, $options = array() ) {
+		$content = "</$name>";
+		if (!isset($options['return']))
+  		echo $content;
+    else
+      return $content;
+    return "";
+	}
+	
 	function tag_options( $options, $escape = true ) {
 		$attrs = array();
 		if ($escape) {
@@ -78,6 +91,12 @@ class Helper {
 				if (!$value)
 				  continue;
 				if ($key == 'return')
+				  continue;
+				if ($key == 'selected')
+				  continue;
+				if ($key == 'no-end')
+				  continue;
+				if ($key == 'effect')
 				  continue;
 				else
 				  $attrs[] = "$key=\"$value\"";
@@ -90,7 +109,82 @@ class Helper {
 		else
 		  return '';
 	}
-	
+
+	function javascript_tag( $data, $options = array() ) {
+		$tag_options = $this->tag_options( $options );
+		echo <<<EOD
+         <script type="text/javascript"$tag_options>
+           $data
+         </script>
+EOD;
+	}
+
+	function javascript_include_tag($data,$options=array()) {
+		  if (!isset($options['charset']))
+		    $options['charset'] = "utf-8";
+      if (!isset($options['type']))
+        $options['type'] = "text/javascript";
+      $tag_options = $this->tag_options( $options );
+			echo <<<EOD
+          <script src="$data.js"$tag_options></script>
+EOD;
+	return "";
+ }
+
+  function stylesheet_link_tag($data) {
+
+			echo <<<EOD
+				<link href="$data.css" media="screen" rel="stylesheet" type="text/css" />
+EOD;
+
+	return "";
+ }
+
+  function stylesheet_import_tag($data) {
+
+			echo <<<EOD
+		    <style type="text/css" media="screen">@import "$data.css";</style>
+EOD;
+
+	return "";
+ }
+
+  function javascript_eventsource($source,$callback) {
+
+			echo <<<EOD
+        <script type="text/javascript">
+
+					var item_list = new Array();
+
+					function add_item(data,entry){
+						alert('add');
+						item_list.push(data[entry]['time']);
+					}
+					
+					$(function () {
+					  $.eventsource({
+					    label:    'json-event-source',
+					    url:      '$source',
+					    dataType: 'text',
+					    message:  function (data) {
+						    eval( 'data = '+data );
+							  for ( var entry in data ) {
+									found = false;
+								  for ( var i=0; i<item_list.length; i++ )
+								    if ( item_list[i] == data[entry]['time'] )
+									    found = true;
+								  if (found == false)
+								    $callback(data,entry);
+							  }
+					    }
+					  });
+					});
+	      </script>
+EOD;
+
+	return "";
+ }
+
 }
 
 /**
@@ -561,9 +655,11 @@ if (!isset($skip_globals)){
 	global $pretty_url_base;
 	global $request;
 	global $db;
+	global $helper;
 	global $response;
 	$api_methods = array();
 	session_start();
+	$helper = new Helper();
 }
 
 if (!isset($hide_debug)){
@@ -571,3 +667,29 @@ if (!isset($hide_debug)){
 	ini_set('display_startup_errors','1');
 	error_reporting (E_ALL & ~E_NOTICE );
 }
+
+function stylesheet_link_tag($options){
+ echo "\n";
+  global $helper;
+  return $helper->stylesheet_link_tag($options);	
+}
+
+function stylesheet_import_tag($options){
+ echo "\n";
+  global $helper;
+  return $helper->stylesheet_import_tag($options);	
+}
+
+function javascript_include_tag($options,$options2=array()){
+ echo "\n";
+  global $helper;
+  return $helper->javascript_include_tag($options,$options2);
+}
+
+function javascript_eventsource($options,$options2=''){
+ echo "\n";
+  global $helper;
+  return $helper->javascript_eventsource($options,$options2);
+}
+
+
