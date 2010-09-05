@@ -184,35 +184,7 @@ class Facebook {
 	  $this->userid = $sess_data['uid'];
 	  return array($sess_data['uid'],$sess_data['session_key']);
 	}
-
-  function avatar_url($uids) {
-	  $fieldlist = array(
-	    'pic_square'
-	  );
-	  $fields = implode(',',$fieldlist);
-	  $params = array(
-	    'uid' => $this->userid,
-      'api_key' => Services_Facebook::$apiKey,
-      'call_id' => microtime(true),
-      'sig' =>  md5("app_id=".$this->appid."session_key=". $this->api->sessionKey."source_id=".$this->userid.Services_Facebook::$secret),
-      'v' => '1.0',
-      'fields' => $fields,
-      'session_key' => $this->api->sessionKey,
-      'uids' => $uids
-	  );
-	  $response = $this->api->users->callMethod( 'users.getinfo', $params );
-		$xml = simplexml_load_string($response->asXML());
-		foreach($xml as $k=>$v){
-		  foreach($v as $b=>$r){
-				if ($b == 'pic_square'){
-					$av = (array)$r;
-					return $av[0];
-				}
-		  }
-		}
-		return false;
-  }
-
+	
 	function permission_to( $perm, $uid=false, $force=false, $return=false ) {
     $params = array(
       'ext_perm' => $perm,
@@ -242,12 +214,28 @@ class Facebook {
 			$params['ext_perm'] = $perm;
 	    $params['next'] = $this->next;
 	    $url = $url . '?' . http_build_query($params);
+	    $apikey = Services_Facebook::$apiKey;
+	    $next = $this->next;
+      $url = "http://facebook.com/authorize.php?api_key=$apikey&v=1.0&ext_perm=$perm&next=$next";
 
 	    if ($return)
 	      return $url;
       header( 'Location:' . $url );
       exit;
     }
+  }
+
+	function has_permission( $perm, $uid=false ) {
+    $params = array(
+      'ext_perm' => $perm,
+      'uid' => $this->userid
+    );
+    if ($uid)
+      $params['uid'] = $uid;
+    $response = $this->api->users->callMethod( 'users.hasAppPermission', $params );
+ 		$xml = simplexml_load_string($response->asXML());
+  	$xml = (array) $xml;
+    return $xml[0];
   }
 
   function friends_timeline( $uid = false ) {
@@ -311,6 +299,34 @@ class Facebook {
   }
 
   function search( $string ) {
+  }
+
+  function avatar_url($uids) {
+	  $fieldlist = array(
+	    'pic_square'
+	  );
+	  $fields = implode(',',$fieldlist);
+	  $params = array(
+	    'uid' => $this->userid,
+      'api_key' => Services_Facebook::$apiKey,
+      'call_id' => microtime(true),
+      'sig' =>  md5("app_id=".$this->appid."session_key=". $this->api->sessionKey."source_id=".$this->userid.Services_Facebook::$secret),
+      'v' => '1.0',
+      'fields' => $fields,
+      'session_key' => $this->api->sessionKey,
+      'uids' => $uids
+	  );
+	  $response = $this->api->users->callMethod( 'users.getinfo', $params );
+		$xml = simplexml_load_string($response->asXML());
+		foreach($xml as $k=>$v){
+		  foreach($v as $b=>$r){
+				if ($b == 'pic_square'){
+					$av = (array)$r;
+					return $av[0];
+				}
+		  }
+		}
+		return false;
   }
 
   function getpages() {
