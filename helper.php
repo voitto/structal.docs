@@ -84,7 +84,7 @@ class Helper {
     return "";
 	}
 	
-	function tag_options( $options, $escape = true ) {
+	function tag_options( $options=array(), $escape = true ) {
 		$attrs = array();
 		if ($escape) {
 			foreach( $options as $key => $value ){

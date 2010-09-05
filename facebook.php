@@ -222,8 +222,9 @@ class Facebook {
     }
   }
 
-  function friends_timeline( $uid ) {
-
+  function friends_timeline( $uid = false ) {
+    if (!$uid)
+      $uid = $this->userid;
 		$hash = md5("app_id=".$this->appid."session_key=".$this->api->sessionKey."source_id=".$uid.Services_Facebook::$secret);
 
 		$url = 'http://www.facebook.com/activitystreams/feed.php';

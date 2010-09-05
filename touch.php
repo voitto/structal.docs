@@ -55,7 +55,8 @@ EOD;
 
 	function mobile_page( $id, $options = array() ) {
 		$options['no-end'] = true;
-    $options['class']  = 'current';
+		if (isset($options['selected']))
+      $options['class']  = 'current';
 	  build_page( $id, $options );
 	}
 	function end_mobile_page() {
@@ -143,7 +144,8 @@ EOD;
 	function mobile_list( $items, $options = array() ) {
 	  global $helper;
 	  $options['no-end'] = true;
-	  $options['class'] = 'rounded';
+	  $options['class'] = 'edgetoedge';
+	  $options['id'] = 'list';
 	  $helper->content_tag("ul", "", $options);
 		echo "\n";
 	  foreach($items as $i)
