@@ -161,24 +161,39 @@ EOD;
 						item_list.push(data[entry]['time']);
 					}
 					
-					$(function () {
-					  $.eventsource({
-					    label:    'json-event-source',
-					    url:      '$source',
-					    dataType: 'text',
-					    message:  function (data) {
-						    eval( 'data = '+data );
-							  for ( var entry in data ) {
-									found = false;
-								  for ( var i=0; i<item_list.length; i++ )
-								    if ( item_list[i] == data[entry]['time'] )
-									    found = true;
-								  if (found == false)
-								    $callback(data,entry);
-							  }
-					    }
-					  });
-					});
+					window.onbeforeunload = closeStreams;
+
+				  function closeStreams() {
+					  if (jQuery.isFunction( $.eventsource )) {
+						  var streamsObj = $.eventsource('streams');
+							$.each(streamsObj, function (i, obj) {
+								$.eventsource('close', obj.options.label);
+				      });
+					  }
+				  }
+				
+				  window.onload = json_eventsource;
+					
+				  function json_eventsource() {
+						setTimeout(function(){
+						  $.eventsource({
+							 label:    'json-event-source',
+						    url:      '$source',
+						    dataType: 'json',
+						    message:  function (data) {
+								  for ( var entry in data ) {
+										found = false;
+									  for ( var i=0; i<item_list.length; i++ )
+									    if ( item_list[i] == data[entry]['time'] )
+										    found = true;
+									  if (found == false)
+									    $callback(data,entry);
+								  }
+						    }
+						  });
+				    }, 8000);
+					}
+					
 	      </script>
 EOD;
 
@@ -326,7 +341,10 @@ function get_profile_id() {
  * @link      http://structal.org/environment
  */
 
-function environment() {
+function environment($arg = false) {
+	global $env;
+	if (isset($env[$arg]))
+	  return $env[$arg];
 	$variants = array(
 	  array(
 	    'id' => 'html',
@@ -338,7 +356,11 @@ function environment() {
 	    'size' => 3000
 	  )
 	);
- return array('content_types'=>$variants);
+  if (!is_array($env))
+    $env = array('content_types'=>$variants);
+  if (!$arg)
+    return $env;
+  return false;
 }
 
   /**
@@ -573,6 +595,12 @@ function redirect_to( $param, $altparam = NULL ) {
   
   global $request,$db;
   
+  if (substr($param,0,4) == 'http') {
+	  header('Location: '.$param);
+	  exit;
+  }
+	
+
   trigger_before( 'redirect_to', $request, $db );
   
   if (is_ajax()){
@@ -701,4 +729,227 @@ function is_mobile() {
 	if(preg_match('/android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i',substr($useragent,0,4)))
     return true;
   return false;
+}
+
+function add_action() {
+	return true;
+}
+
+function get_header() {
+  include 'header.php';
+}
+
+function wp_footer() {
+	return true;
+}
+
+function have_posts() {
+	return false;
+}
+
+function _e($e) {
+	echo $e;
+}
+
+function __() {
+	return true;
+}
+
+function get_footer() {
+	include 'footer.php';
+}
+
+function get_option() {
+	return true;
+}
+
+function is_home() {
+	return true;
+}
+
+function wp_title() {
+	return "";
+}
+
+function get_locale() {
+	return "";
+}
+
+function get_settings() {
+	return "";
+}
+
+function wp_list_pages() {
+	return "";
+}
+
+function wp_specialchars() {
+	return "";
+}
+
+function get_sidebar() {
+	include 'sidebar.php';
+}
+
+function is_single() {
+	return true;
+}
+
+function get_posts() {
+	return array();
+}
+
+function wp_tag_cloud() {
+	return true;
+}
+
+function wp_list_cats() {
+	return true;
+}
+
+function wp_list_bookmarks() {
+	return true;
+}
+
+function wp_get_archives() {
+	return true;
+}
+
+function wp_register() {
+	return true;
+}
+
+function wp_loginout() {
+	return true;
+}
+
+function get_row() {
+	return true;
+}
+
+if ($_SERVER['REMOTE_ADDR'] == '97.115.120.91') {
+
+//if ($_SERVER['REMOTE_ADDR'] == '69.30.72.254') {
+function render_theme( $theme, $title, $description ) {
+  
+  // dbscript
+  global $request, $db;
+  
+  // wordpress
+  global $blogdata, $optiondata, $current_user, $user_login, $userdata;
+  global $user_level, $user_ID, $user_email, $user_url, $user_pass_md5;
+  global $wpdb, $wp_query, $post, $limit_max, $limit_offset, $comments;
+  global $req, $wp_rewrite, $wp_version, $openid, $user_identity, $logic;
+  global $submenu;
+  global $comment_author; 
+  global $comment_author_email;
+  global $comment_author_url;
+
+  $folder = 'wp-content' . DIRECTORY_SEPARATOR . 'themes';
+  $folder .= DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR;
+  
+  add_include_path($folder);
+  
+  global $wpmode;
+  
+  $wpmode = "posts";
+  $wpdb = new wpdb();
+  
+	$blogdata = array(
+	  'home'=>base_url(true),
+	  'name'=>$title,
+	  'subtitle'=>environment('site_subtitle'),
+	  'description'=>$description,
+	  'wpurl'=>base_url(true),
+	  'url'=>base_url(true),
+	  'atom_url'=>base_url(true).$atom,
+	  'rss_url'=>base_url(true).$rss,
+	  'rss2_url'=>base_url(true).$rss,
+	  'charset'=>'utf-8',
+	  'html_type'=>'text/html',
+	  'theme_url'=>theme_path(false,$folder),
+	  'stylesheet_url'=>theme_path(false,$folder)."style.css",
+	  'stylesheet_directory'=>theme_path(false,$folder),
+	  'pingback_url'=>base_url(true),
+	  'template_url'=>theme_path(true,$folder)
+	);
+
+  if ($request->resource != 'posts' || !(in_array($request->action,array('replies','index')))) {
+    $wpmode = "other";
+    if (is_file($folder . "functions.php" ))
+      require_once( $folder . "functions.php" );
+    require_once( $folder . "page.php" );
+  } else {
+    if (is_file($folder . "functions.php" ))
+      require_once( $folder . "functions.php" );
+    if ( file_exists( $folder . "index.php" ))
+      require_once( $folder . "index.php" );
+    else
+      require_once( $folder . "index.html" );
+  }
+}
+
+
+class wpdb {
+  var $base_prefix;
+  var $prefix;
+  var $show_errors;
+  var $dbh;
+  var $result;
+  var $last_result;
+  var $rows_affected;
+  var $insert_id;
+  var $col_info;
+  var $posts;
+  function wpdb() {
+    $this->posts = 'posts';
+    $this->col_info = array();
+    $this->last_result = array();
+    $this->base_prefix = "";
+    $this->prefix = "";
+    $this->show_errors = false;
+  }
+  function prepare() {
+	  return true;
+  }
+  function get_row($query = null, $output = OBJECT, $y = 0) {
+    return array();
+  }
+}
+
+function base_url($return = false) {
+  global $request;
+  $base = $request->base;
+  if ( !( substr( $base, -1 ) == '/' ))
+    $base = $base . "/";
+  if ($return)
+    return $base;
+  echo $base;
+}
+
+function theme_path($noslash = false,$path) {
+  global $request,$db;
+  $base = "";
+  if ($noslash && "/" == substr($path,-1))
+    $path = substr($path,0,-1);
+  return $path;
+}
+
+function bloginfo( $attr ) {
+  echo get_bloginfo($attr);
+}
+
+function get_bloginfo( $var ) {
+  global $blogdata;
+  if (in_array($var,array('wpurl')))
+    if (isset($blogdata[$var]))
+      if ("/" == substr($blogdata[$var],-1))
+        return substr($blogdata[$var],0,-1);
+  if (isset($blogdata[$var]))
+    return $blogdata[$var];
+  return "";
+}
+
+
+
 }
