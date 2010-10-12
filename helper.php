@@ -955,5 +955,48 @@ function get_bloginfo( $var ) {
   return "";
 }
 
+function javascript_periodical($source,$callback){
+		echo <<<EOD
+     <script type="text/javascript">
 
+			var item_list = new Array();
+
+			function add_item(data,entry){
+				alert('add');
+				item_list.push(data[entry]['time']);
+			}
+			
+			$.PeriodicalUpdater('$source', {
+			    method: 'get',          // method; get or post
+			      data: '',                   // array of values to be passed to the page - e.g. {name: "John", greeting: "hello"}
+			      minTimeout: 3000,       // starting value for the timeout in milliseconds
+			      maxTimeout: 7000,       // maximum length of time between requests
+			      multiplier: 2,          // if set to 2, timerInterval will double each time the response hasn't changed (up to maxTimeout)
+			      type: 'text',           // response type - text, xml, json, etc.  See $.ajax config options
+			    maxCalls: 0,            // maximum number of calls. 0 = no limit.
+			    autoStop: 0             // automatically stop requests after this many returns of the same data. 0 = disabled.
+			}, function(data) {
+				if (data.length > 0) {
+					data = data.substring(5);
+		      eval( "data = " + data );
+		    } else {
+			    return false;
+		    }
+			  for ( var entry in data ) {
+					found = false;
+				  for ( var i=0; i<item_list.length; i++ )
+				    if ( item_list[i] == data[entry]['time'] )
+					    found = true;
+				  if (found == false)
+				    $callback(data,entry);
+			  }
+			
+			});
+
+			
+      </script>
+EOD;
+
+return "";
+}
 
