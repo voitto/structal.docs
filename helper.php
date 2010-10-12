@@ -179,8 +179,15 @@ EOD;
 						  $.eventsource({
 							 label:    'json-event-source',
 						    url:      '$source',
-						    dataType: 'json',
+						    dataType: 'text',
 						    message:  function (data) {
+							    if (typeof(data)=='object'&&(data instanceof Array)) {
+								
+							    } else if (data.length > 0) {
+	                  eval( "data = " + data );
+							    } else {
+								    return false;
+							    }
 								  for ( var entry in data ) {
 										found = false;
 									  for ( var i=0; i<item_list.length; i++ )
@@ -191,7 +198,7 @@ EOD;
 								  }
 						    }
 						  });
-				    }, 8000);
+				    }, 5000);
 					}
 					
 	      </script>
@@ -827,9 +834,7 @@ function get_row() {
 	return true;
 }
 
-if ($_SERVER['REMOTE_ADDR'] == '97.115.120.91') {
 
-//if ($_SERVER['REMOTE_ADDR'] == '69.30.72.254') {
 function render_theme( $theme, $title, $description ) {
   
   // dbscript
@@ -952,4 +957,3 @@ function get_bloginfo( $var ) {
 
 
 
-}
