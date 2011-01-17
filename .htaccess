@@ -1,0 +1,6 @@
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^www.structal.org$ [NC]
+RewriteRule ^(.*)$ http://structal.org/$1 [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+)$ /index.php/$1
