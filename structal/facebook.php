@@ -45,11 +45,8 @@
 
 class FacebookHelper extends Helper {
 	
-	function header( $key, $xd, $next ) {
+	function header( $key, $xd, $next, $url ) {
 		
-		global $request;
-		$url = $request->url_for('facebook_login');
-
 		echo <<<EOD
 			<script type="text/javascript">
 			  function facebook_onlogin() {
@@ -179,8 +176,7 @@ class Facebook {
   }
 
 	function authorize_from_access() {
-		global $request;
-		$sess_data = (array) $this->api->auth->callMethod('auth.getSession',array('auth_token'=>$request->auth_token));
+		$sess_data = (array) $this->api->auth->callMethod('auth.getSession',array('auth_token'=>$_GET['auth_token']));
 	  $this->userid = $sess_data['uid'];
 	  return array($sess_data['uid'],$sess_data['session_key']);
 	}
@@ -238,6 +234,16 @@ class Facebook {
     return $xml[0];
   }
 
+  function friends_list( $uid = false ) {
+    $params = array(
+      'uid' => $this->userid
+    );
+    if ($uid)
+      $params['uid'] = $uid;
+    $response = $this->api->users->callMethod( 'friends.get', $params );
+ 		return (array)simplexml_load_string($response->asXML());
+  }
+
   function friends_timeline( $uid = false ) {
     if (!$uid)
       $uid = $this->userid;
@@ -267,6 +273,18 @@ class Facebook {
 	    $params['uid'] = $uid;
     $params['post_id'] = $id;
 	  $res = $this->api->users->callMethod( 'stream.addLike', $params );
+	  return (intval((string)$res) == 1);
+  }
+
+  function notify( $message, $subject, $recipients=false ) {
+    $params = array(
+      'subject' => $subject,
+      'recipients' => $this->userid,
+      'text' => $message
+    );
+    if ($recipients)
+      $params['recipients'] = implode(',',$recipients);
+	  $res = $this->api->users->callMethod( 'notifications.sendEmail', $params );
 	  return (intval((string)$res) == 1);
   }
 
@@ -327,6 +345,27 @@ class Facebook {
 		  }
 		}
 		return false;
+  }
+
+  function userinfo($uids) {
+	  $fieldlist = array(
+	    'pic_square',
+	    'name',
+	    'uid'
+	  );
+	  $fields = implode(',',$fieldlist);
+	  $params = array(
+	    'uid' => $this->userid,
+      'api_key' => Services_Facebook::$apiKey,
+      'call_id' => microtime(true),
+      'sig' =>  md5("app_id=".$this->appid."session_key=". $this->api->sessionKey."source_id=".$this->userid.Services_Facebook::$secret),
+      'v' => '1.0',
+      'fields' => $fields,
+      'session_key' => $this->api->sessionKey,
+      'uids' => $uids
+	  );
+	  $response = $this->api->users->callMethod( 'users.getinfo', $params );
+		return (array)simplexml_load_string($response->asXML());
   }
 
   function getpages() {

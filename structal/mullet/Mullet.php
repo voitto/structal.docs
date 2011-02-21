@@ -19,14 +19,20 @@ class Mullet {
 	public $conn;
 	private $dbclass,$user,$pass;
 	
-	function __construct( $dsn=false ) {
+	function __construct( $dsn=false, $pass=false ) {
+		if ($pass) {
+		  $this->user = $dsn;
+		  $this->pass = $pass;
+		  $this->dbclass = 'MulletRemote';
+		  return;
+		}
 		if (!defined('DATABASE_ENGINE')) 
 		  return;
 		$this->connect($dsn);
 	}
 	
 	function __get( $arg ){
-		if (!defined('DATABASE_ENGINE'))
+		if (!defined('DATABASE_ENGINE') || ($this->dbclass == 'MulletRemote'))
 		  return new $this->dbclass($this->user,$this->pass,$arg);
     return new $this->dbclass($this->conn,$arg);
   }
@@ -261,6 +267,8 @@ class MulletCollection {
 	}
 	
 	function update( $criteria, $newobj ) {
+		if (!$this->exists)
+		  $this->db->create_if_not_exists( $newobj, $this->name );
 		return $this->db->update_doc( $criteria, $newobj, $this->name );
 	}
 	
@@ -318,7 +326,7 @@ class MulletRemote extends MulletDatabase {
 	function insert_doc( $doc, $collname ) {
 		return $this->post(
 			'https://datamullet.com/'.$this->name.'/'.$collname.'/_insert',
-      array('docs'=>json_encode(array(array('x'=>42)))),
+      array('docs'=>json_encode(array($doc))),
 			array(
 		    CURLOPT_SSL_VERIFYPEER => false,
 		    CURLOPT_USERPWD => $this->user.':'.$this->pass,
@@ -332,7 +340,21 @@ class MulletRemote extends MulletDatabase {
 	}
 
 	function update_doc( $criteria, $newobj, $collname ) {
-		return false;
+	  $url = 'https://datamullet.com/'.$this->name.'/'.$collname.'/_update';
+		$data = $this->post(
+			$url,
+      array(
+	      'newobj'=>json_encode(array($newobj)),
+	      'criteria'=>json_encode(array($criteria))
+      ),
+			array(
+		    CURLOPT_SSL_VERIFYPEER => false,
+		    CURLOPT_USERPWD => $this->user.':'.$this->pass,
+		    CURLOPT_HTTPAUTH => CURLAUTH_BASIC
+		  )
+		);
+		$result = json_decode($data);
+	  return new MulletIterator($result->results);
 	}
 
   function count( $collname ) {
@@ -341,8 +363,21 @@ class MulletRemote extends MulletDatabase {
   }
 
   function find( $collname, $criteria = false ) {
-	  $results = false;
-	  return new MulletIterator($results);
+	  if (!$criteria)
+	    $url = 'https://datamullet.com/'.$this->name.'/'.$collname.'/_find';
+	  else
+	    $url = 'https://datamullet.com/'.$this->name.'/'.$collname.'/_find?criteria='.json_encode(array($criteria));
+		$data = $this->get(
+			$url,
+      array(),
+			array(
+		    CURLOPT_SSL_VERIFYPEER => false,
+		    CURLOPT_USERPWD => $this->user.':'.$this->pass,
+		    CURLOPT_HTTPAUTH => CURLAUTH_BASIC
+		  )
+		);
+		$result = json_decode($data);
+	  return new MulletIterator($result->results);
   }
 
 	function find_one( $collname ) {
@@ -435,6 +470,8 @@ class MulletMySQL extends MulletDatabase {
 			    $vals[':'.$k] = base64_encode(serialize($v));
 			  elseif (is_string($k) && is_integer($v))
 			    $vals[':'.$k] = $v;
+			  elseif (is_string($k) && is_integer((integer)$v))
+			    $vals[':'.$k] = $v;
 		  $query = "REPLACE INTO ".$this->name."_".$collname." (";
 		  foreach(array_keys($vals) as $k)
 		    $query .= substr($k,1).",";
@@ -494,6 +531,8 @@ class MulletMySQL extends MulletDatabase {
 				  elseif (is_string($k) && is_object($v))
 				    $vals[':'.$k] = pg_escape_bytea(serialize($v));
 				  elseif (is_string($k) && is_integer($v))
+				    $vals[':'.$k] = $v;
+				  elseif (is_string($k) && is_integer((integer)$v))
 				    $vals[':'.$k] = $v;
 				  $comma = '';
 				  foreach(array_keys($vals) as $k){
@@ -698,15 +737,19 @@ class MulletPostgreSQL extends MulletDatabase {
 		if (class_exists('PDO')) {
 		  $query = "UPDATE ".$this->name."_".$collname." SET ";
 		  $vals = array( ':jsonval' => serialize( $newobj ) );
+		  if (!is_array($newobj[0]))
+		    $newobj = array($newobj);
 	    foreach ($newobj as $n)
 		    foreach ($n as $k=>$v)
 		      if (is_string($k) && is_array($v))
 				    $vals[':'.$k] = pg_escape_bytea(serialize($v));
 				  elseif (is_string($k) && is_string($v))
-				    $vals[':'.$k] = mysql_escape_string($v);
+				    $vals[':'.$k] = pg_escape_string($v);
 				  elseif (is_string($k) && is_object($v))
 				    $vals[':'.$k] = pg_escape_bytea(serialize($v));
 				  elseif (is_string($k) && is_integer($v))
+				    $vals[':'.$k] = $v;
+				  elseif (is_string($k) && is_integer((integer)$v))
 				    $vals[':'.$k] = $v;
 				  $comma = '';
 				  foreach(array_keys($vals) as $k){
@@ -715,6 +758,8 @@ class MulletPostgreSQL extends MulletDatabase {
 				  }
 		  $query .= " WHERE ";
 		  $and = '';
+		  if (!is_array($criteria[0]))
+		    $criteria = array($criteria);
 	    foreach ($criteria as $c)
 		    foreach ($c as $k=>$v) {
 		      if (is_string($k) && is_string($v))
@@ -750,10 +795,12 @@ class MulletPostgreSQL extends MulletDatabase {
 	      elseif (is_string($k) && is_array($v))
 			    $vals[':'.$k] = pg_escape_bytea(serialize($v));
 			  elseif (is_string($k) && is_string($v))
-			    $vals[':'.$k] = mysql_escape_string($v);
+			    $vals[':'.$k] = pg_escape_string($v);
 			  elseif (is_string($k) && is_object($v))
 			    $vals[':'.$k] = pg_escape_bytea(serialize($v));
 			  elseif (is_string($k) && is_integer($v))
+			    $vals[':'.$k] = $v;
+			  elseif (is_string($k) && is_integer((integer)$v))
 			    $vals[':'.$k] = $v;
 		  $query = "INSERT INTO ".$this->name."_".$collname." (";
 		  foreach(array_keys($vals) as $k)
@@ -838,8 +885,7 @@ class MulletPostgreSQL extends MulletDatabase {
 			}
 	    $results = $statement->fetchAll(PDO::FETCH_CLASS,get_class((object)array()));
 		} else {
-			$result = mysql_query( $query );
-			$results = mysql_fetch_assoc( $result );
+      // XXX
 		}
 	  return new MulletIterator($results);
   }
@@ -969,6 +1015,7 @@ function json_emit($data) {
 	header('HTTP/1.1 200 OK');
 	header('Content-Type: application/json');
 	echo json_encode($data)."\n";
+	exit;
 };
 
 
