@@ -11,6 +11,8 @@ respond( 'GET',      '/[:resource]/[:action]',   'constructor' );
 respond( 'POST',     '/[:resource]/[:action]',   'constructor' );
 respond( 'GET',      '/',                        'index' );
 
+// JSON
+
 function constructor($request,$response) {
   require 'lib/Mullet.php';
   $model = 'mdl/'.$request->resource.".php";
@@ -31,6 +33,8 @@ function constructor($request,$response) {
       'code'=>500
     ));
 }
+
+// HTML
 
 function index($request,$response) {
   require 'lib/Mustache.php';

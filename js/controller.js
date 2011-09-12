@@ -1,6 +1,6 @@
 jQuery(function($){
 
-  window.FollowButtonApp = Spine.Controller.create({
+  window.MyApp = Spine.Controller.create({
   
     el: $("body"),
   
@@ -18,6 +18,6 @@ jQuery(function($){
 
   });
 
-  window.App = FollowButtonApp.init();
+  window.App = MyApp.init();
 
 });
