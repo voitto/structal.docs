@@ -1,6 +1,5 @@
 <?php
 
-require 'config.php';
 require 'lib/Klein.php';
 
 respond( 'GET',      '/changes',                 'changes' );
