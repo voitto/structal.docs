@@ -15,6 +15,16 @@
 
 
 
+if (isset($config)) {
+
+  define( 'DATABASE_HOST',      $config[0]);
+  define( 'DATABASE_USER',      $config[1]);
+  define( 'DATABASE_PASSWORD',  $config[2]);
+  define( 'DATABASE_NAME',      $config[3]);
+  define( 'DATABASE_PORT',      $config[4]);
+  define( 'DATABASE_ENGINE',    $config[5]);
+  
+}
 
 class Mullet {
 	

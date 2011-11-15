@@ -1,12 +1,14 @@
 <?php
 
 
-define( 'DATABASE_ENGINE',    'pgsql'); // mysql | pgsql | couchdb | mongodb | sqlite
-define( 'DATABASE_USER',      'brian');
-define( 'DATABASE_PASSWORD',  '');
-define( 'DATABASE_NAME',      'docs');
-define( 'DATABASE_HOST',      ''); // 'localhost' | '' | IP | name
-define( 'DATABASE_PORT',      5432); // 3306/mysql | 5432/pgsql | 443
+$config = array(
+  '',       // host name ('localhost' | '' | IP | name)
+  'brian',  // db user name
+  '',       // db user password
+  'docs',   // db name
+  5432,     // port number (3306/mysql | 5432/pgsql | 443/ssl)
+  'pgsql'   // db type (mysql | pgsql | couchdb | mongodb | sqlite | remote)
+);
 
 
 
