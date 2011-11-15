@@ -1401,6 +1401,117 @@ class Controller extends MoorAbstractController  {
 	 function member_of() {
 	   return false;
 	 }
+
+   function get() {
+     $conn = new Mullet();
+     $class = $_GET['_Moor_class'];     
+     $coll = $conn->user->$class;
+     $items = array();
+     if (isset($_GET['id']))
+       $cursor = $coll->find(array(
+         'id' => $_GET['id']
+       ));
+     else
+       $cursor = $coll->find();
+   	while( $cursor->hasNext() ) {
+   		$item = $cursor->getNext();
+       $items[] = (array) $item;
+   	}
+     echo json_encode($items);
+   }
+
+   function post() {
+     $conn = new Mullet();
+     $class = $_GET['_Moor_class'];     
+     $coll = $conn->user->$class;
+     $data = json_decode(file_get_contents('php://input'));
+     $result = $coll->insert(
+       $data
+     );
+     if (!isset($data->id)) {
+       // for backbone.js create a model.id
+       $cursor = $coll->find(array(
+         'name' => $data->name
+       ));
+       $item = $cursor->getNext();
+       $data->id = $item->keyname;
+       $result = $coll->update(
+         array(array( 'keyname' => $item->keyname )),
+         array((array)$data)
+       );
+     }
+     $_GET['id'] = $data->id;
+     echo json_encode(array(
+       'id'=>$data->id
+     ));
+   }
+
+   function put() {
+
+     $conn = new Mullet();
+     $class = $_GET['_Moor_class'];     
+     $coll = $conn->user->$class;
+     $data = json_decode(file_get_contents('php://input'));
+     trigger_error(json_encode($data));
+     $result = $coll->update(
+       array(array( 'id' => $_GET['id'] )),
+       array((array)$data)
+     );
+     echo json_encode(array(
+       'ok'=>true
+     ));
+   }
+
+   function delete() {
+     $conn = new Mullet();
+     $class = $_GET['_Moor_class'];     
+     $coll = $conn->user->$class;
+     $result = $coll->remove(
+       array(array( 'id' => $_GET['id'] ))
+     );
+     echo json_encode(array(
+       'ok'=>true
+     ));
+   }
+
+   function changes() {
+     $changes = array();
+     $conn = new Mullet();
+     $coll = $conn->system->changes;
+     $class = $_GET['_Moor_class'];     
+     $cursor = $coll->find(array(
+       'resource' => $class
+     ));
+   	while( $cursor->hasNext() ) {
+   		$c = $cursor->getNext();
+       $changes['results'][] = array(
+         'seq' => $c->seq,
+         'id' => $c->id,
+         'changes' => array(array(
+           'rev' => $c->rev
+         ))
+       );
+     }
+     if (isset($c))
+       $changes['last_seq'] = $c->id;
+     header('HTTP/1.1 200 OK');
+     header('Content-Type: application/json');
+     echo json_encode($changes);
+   }
+
+   function addChange() {
+     $conn = new Mullet();
+     $coll = $conn->system->changes;
+     $class = $_GET['_Moor_class'];     
+     $result = $coll->insert(
+       array(
+       'resource' => $class,
+       'seq' => time(),
+       'id' => $_GET['id'],
+       'rev' => time()
+       )
+     );
+   }
 	 
 	 function let_access( $fields ) {
      $this->let_read( $fields );
