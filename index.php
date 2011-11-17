@@ -12,8 +12,8 @@ $config = array(
 
 
 
-require 'lib/Structal.php';
 require 'lib/Moor.php';
+require 'lib/Structal.php';
 require 'lib/Mullet.php';
 
 
@@ -36,7 +36,7 @@ class Pages extends Controller {
   
   function init() {
     self::$item = '';
-    if ('my.ip.addr' != $_SERVER['REMOTE_ADDR'] && !('get' == strtolower($_SERVER['REQUEST_METHOD']))) exit;
+//    if ('my.ip.addr' != $_SERVER['REMOTE_ADDR'] && !('get' == strtolower($_SERVER['REQUEST_METHOD']))) exit;
   //  Task::bind( 'update', 'render' );
 //    Task::bind( 'update', 'addChange' );
 //    Task::bind( 'delete', 'addChange' );
@@ -89,12 +89,33 @@ function index() {
   echo $m->render(file_get_contents('tpl/index.html'),$params);
 }
 
+if (isset($_GET['class'])) {
+  $class = ucwords($_GET['class']);
+  $method = strtolower($_SERVER['REQUEST_METHOD']);
+  if (isset($_GET['method']))
+    $method = $_GET['method'];
+  if (method_exists($class,$method))
+    $class::$method();
+} else {
+  index();
+}
+
+
 
 /*
+
+(optional) Routes (requires Moor.php)
+
 if (!in_array(strtolower($_SERVER['REQUEST_METHOD']),array('put','delete')))
   Moor::route('/@class/@method', '@class(uc)::@method(lc)');
 Moor::route('/@class/:id([0-9A-Za-z_-]+)', '@class(uc)::'.strtolower($_SERVER['REQUEST_METHOD']));
 Moor::route('/@class', '@class(uc)::'.strtolower($_SERVER['REQUEST_METHOD']));
 Moor::route( '*', 'index' );
 Moor::run();
+
 */
+
+
+
+
+

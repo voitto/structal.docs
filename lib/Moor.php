@@ -1404,7 +1404,10 @@ class Controller extends MoorAbstractController  {
 
    function get() {
      $conn = new Mullet();
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $coll = $conn->user->$class;
      $items = array();
      if (isset($_GET['id']))
@@ -1422,7 +1425,10 @@ class Controller extends MoorAbstractController  {
 
    function post() {
      $conn = new Mullet();
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $coll = $conn->user->$class;
      $data = json_decode(file_get_contents('php://input'));
      $result = $coll->insert(
