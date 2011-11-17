@@ -1455,10 +1455,12 @@ class Controller extends MoorAbstractController  {
    function put() {
 
      $conn = new Mullet();
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $coll = $conn->user->$class;
      $data = json_decode(file_get_contents('php://input'));
-     trigger_error(json_encode($data));
      $result = $coll->update(
        array(array( 'id' => $_GET['id'] )),
        array((array)$data)
@@ -1470,7 +1472,10 @@ class Controller extends MoorAbstractController  {
 
    function delete() {
      $conn = new Mullet();
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $coll = $conn->user->$class;
      $result = $coll->remove(
        array(array( 'id' => $_GET['id'] ))
@@ -1484,7 +1489,10 @@ class Controller extends MoorAbstractController  {
      $changes = array();
      $conn = new Mullet();
      $coll = $conn->system->changes;
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $cursor = $coll->find(array(
        'resource' => $class
      ));
@@ -1508,7 +1516,10 @@ class Controller extends MoorAbstractController  {
    function addChange() {
      $conn = new Mullet();
      $coll = $conn->system->changes;
-     $class = $_GET['_Moor_class'];     
+     if (isset($_GET['class']))
+       $class = $_GET['class'];
+     else
+       $class = $_GET['_Moor_class'];
      $result = $coll->insert(
        array(
        'resource' => $class,
