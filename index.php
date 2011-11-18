@@ -12,7 +12,6 @@ $config = array(
 
 
 
-require 'lib/Moor.php';
 require 'lib/Structal.php';
 require 'lib/Mullet.php';
 
@@ -105,6 +104,9 @@ if (isset($_GET['class'])) {
 /*
 
 (optional) Routes (requires Moor.php)
+
+require 'lib/Moor.php';
+
 
 if (!in_array(strtolower($_SERVER['REQUEST_METHOD']),array('put','delete')))
   Moor::route('/@class/@method', '@class(uc)::@method(lc)');
