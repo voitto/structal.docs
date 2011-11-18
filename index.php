@@ -39,7 +39,7 @@ class Pages extends Controller {
   //  Task::bind( 'update', 'render' );
 //    Task::bind( 'update', 'addChange' );
 //    Task::bind( 'delete', 'addChange' );
-  //  Task::bind( 'create', 'addChange' );
+    Page::bind( 'create', 'addChange' );
   //  Task::bind( 'read', 'render', 'before' );
   }
   
@@ -93,8 +93,10 @@ if (isset($_GET['class'])) {
   $method = strtolower($_SERVER['REQUEST_METHOD']);
   if (isset($_GET['method']))
     $method = $_GET['method'];
-  if (method_exists($class,$method))
-    $class::$method();
+  if (method_exists($class,$method)){
+    $$class = new $class();
+    $$class->$method();
+  }
 } else {
   index();
 }

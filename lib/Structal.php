@@ -423,6 +423,11 @@ if (class_exists('MoorAbstractController')) {
 
   	protected function beforeAction() {}
   	protected function afterAction() {}
+  	
+  	public function __destruct() {
+  		$this->afterAction();
+  	}
+  	
   }
 
 } else {
@@ -770,29 +775,9 @@ if (class_exists('MoorAbstractController')) {
   	  if (method_exists($this,'init'))
   	    $this->init();
   		$this->beforeAction();
+  	}
 
-  		try {
-  		    parent::__construct();
-
-  		} catch (Exception $e) {
-
-  		    $exception = new ReflectionClass($e);
-
-  		    while($exception) {
-      		    // pass exceptions to a __catch_ExceptionClass method 
-      		    $magic_exception_catcher = "catch" . $exception->getName();
-  				if (is_callable(array($this, $magic_exception_catcher))) {
-  					call_user_func_array(array($this, $magic_exception_catcher), array($e));
-  					break;
-  				}
-  				$exception = $exception->getParentClass();
-  			}
-
-   			if (!$exception) {
-                  throw $e;
-              }
-  		}
-
+  	public function __destruct() {
   		$this->afterAction();
   	}
 

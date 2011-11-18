@@ -156,6 +156,7 @@ jQuery(function($){
     init: function() {
       var el = this;
       Page.bind( 'refresh change', this.proxy(this.render));
+      setInterval(this.poll, 5*1000);
     },
     
     render: function() {
@@ -176,7 +177,39 @@ jQuery(function($){
     create: function() {
       item = Page.create({ name:'Untitled page', body:'' });
       this.navigate( '/pages', item.id, 'edit' );
-    }
+    },
+    
+    poll: function() {
+      $.ajax({
+        contentType: 'application/json',
+        dataType: 'json',
+  			type : 'GET',
+        url : '?class=pages&method=changes',
+        success : function(data) {
+          var pageid = [];
+          Page.each(function(p) {
+            pageid.push(p.id);
+          });
+          for (n in data.results) {
+            if (-1 == ($.inArray(data.results[n].id, pageid))) {
+              $.ajax({
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'GET',
+                url: '?class=pages&id='+data.results[n].id,
+                success: function(data){
+                  Page.create({
+                    name: data[0].name,
+                    body: data[0].body,
+                    id: data[0].id
+                  });
+                }
+              });
+            }
+          }
+        }
+      });
+    },
     
   });
 
