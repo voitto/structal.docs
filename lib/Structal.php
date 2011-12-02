@@ -18,6 +18,10 @@ class Model {
     
   }
   
+  function configure() {
+    
+  }
+  
   function bind( $events, $callback, $when='after' ) {
     $events = explode(' ',$events);
     $map = array(
@@ -422,7 +426,9 @@ if (class_exists('MoorAbstractController')) {
   	}
 
   	protected function beforeAction() {}
-  	protected function afterAction() {}
+  	protected function afterAction() {
+  	  trigger_after( strtolower($_SERVER['REQUEST_METHOD']) );
+  	}
   	
   	public function __destruct() {
   		$this->afterAction();
@@ -775,6 +781,21 @@ if (class_exists('MoorAbstractController')) {
   	  if (method_exists($this,'init'))
   	    $this->init();
   		$this->beforeAction();
+      if (isset($_GET['class'])) {
+        $class = ucwords($_GET['class']);
+        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        if (isset($_GET['method']))
+          $method = $_GET['method'];
+        if (method_exists($class,$method)){
+          //$$class = new $class();
+          //$$class->$method();
+          if (get_class($this) == $class)
+            $this->$method();
+        }
+      } else {
+        index();
+      }
+
   	}
 
   	public function __destruct() {
@@ -782,7 +803,9 @@ if (class_exists('MoorAbstractController')) {
   	}
 
   	protected function beforeAction() {}
-  	protected function afterAction() {}
+  	protected function afterAction() {
+  	  trigger_after( strtolower($_SERVER['REQUEST_METHOD']) );
+  	}
   }
   
   
@@ -835,6 +858,18 @@ function before_filter( $name, $func, $when = 'before' ) {
 
 function after_filter( $name, $func, $when = 'after' ) {
   aspect_join_functions( $func, $name, $when );
+}
+
+
+
+function index() {
+  require 'lib/Mustache.php';
+  $m = new Mustache;
+  session_start();
+  $params = array();
+  if (isset($_SESSION['current_user']))
+    $params['username'] = $_SESSION['current_user'];
+  echo $m->render(file_get_contents('tpl/index.html'),$params);
 }
 
 
