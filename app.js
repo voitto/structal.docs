@@ -156,7 +156,7 @@ jQuery(function($){
     init: function() {
       var el = this;
       Page.bind( 'refresh change', this.proxy(this.render));
-      setInterval( function(){ el.poll( 'posts', 'serverChanges' ) }, 4*1000 );
+      setInterval( function(){ el.poll( 'pages', 'serverChanges' ) }, 4*1000 );
     },
     
     render: function() {
