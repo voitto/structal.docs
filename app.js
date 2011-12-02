@@ -180,17 +180,18 @@ jQuery(function($){
     },
     
     serverChanges: function(data) {
+      var pages = data;
       var pageid = [];
       Page.each(function(p) {
         pageid.push(p.id);
       });
-      for (n in data.results) {
-        if (-1 == ($.inArray(data.results[n].id, pageid))) {
+      for (n in pages.results) {
+        if (-1 == ($.inArray(pages.results[n].id, pageid))) {
           $.ajax({
             contentType: 'application/json',
             dataType: 'json',
             type: 'GET',
-            url: '?class=pages&id='+data.results[n].id,
+            url: '?class=pages&id='+pages.results[n].id,
             success: function(data){
               Page.create({
                 name: data[0].name,

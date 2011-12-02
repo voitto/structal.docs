@@ -59,7 +59,7 @@ class Pages extends Controller {
 }
 
 
-
+return new Pages;
 
 
 
